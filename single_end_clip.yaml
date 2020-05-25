@@ -1,0 +1,97 @@
+#!/usr/bin/env eCLIP_singleend
+
+### eCLIP_singleend ###
+### wf_get_peaks_scatter_se.cwl ###
+
+dataset: SLBP
+
+species: hg19
+
+chrom_sizes:
+  class: File
+  path: hg19.chrom.sizes
+
+speciesGenomeDir:
+  class: Directory
+  path: hg19_starindex
+
+repeatElementGenomeDir:
+  class: Directory
+  path: hg19_repbase_starindex
+
+samples:
+  - 
+    - ip_read:
+      name: CLIP_vivo1
+      read1:
+        class: File
+        path: MC_vivo1_IP_S5_L002_R1_001.fastq.gz
+      adapters:
+        class: File
+        path: InvRNA1_adapters.fasta
+
+    - input_read:
+      name: INPUT_vivo1
+      read1:
+        class: File
+        path: MC_vivo1_Input_S1_L002_R1_001.fastq.gz
+      adapters:
+        class: File
+        path: Ril19_adapters.fasta
+
+  - 
+    - ip_read:
+      name: CLIP_vivo2
+      read1:
+        class: File
+        path: MC_vivo2_IP_S6_L002_R1_001.fastq.gz
+      adapters:
+        class: File
+        path: InvRNA1_adapters.fasta
+
+    - input_read:
+      name: INPUT_vivo2
+      read1:
+        class: File
+        path: MC_vivo2_Input_S2_L002_R1_001.fastq.gz
+      adapters:
+        class: File
+        path: Ril19_adapters.fasta
+
+  -
+    - ip_read:
+      name: CLIP_vitro1
+      read1:
+        class: File
+        path: MC_vitro1_IP_S7_L002_R1_001.fastq.gz
+      adapters:
+        class: File
+        path: InvRNA2_adapters.fasta
+
+    - input_read:
+      name: INPUT_vitro1
+      read1:
+        class: File
+        path: MC_vitro1_Input_S3_L002_R1_001.fastq.gz
+      adapters:
+        class: File
+        path: Ril19_adapters.fasta
+
+  -
+    - ip_read:
+      name: CLIP_vitro2
+      read1:
+        class: File
+        path: MC_vitro2_IP_S8_L002_R1_001.fastq.gz
+      adapters:
+        class: File
+        path: InvRNA2_adapters.fasta
+
+    - input_read:
+      name: INPUT_vitro2
+      read1:
+        class: File
+        path: MC_vitro2_Input_S4_L002_R1_001.fastq.gz
+      adapters:
+        class: File
+        path: Ril19_adapters.fasta

@@ -10,7 +10,7 @@
 python counMutationsBam.py -h
 #Outputs (.coverage files) to /coverage folders within folder for each sample.
 
-#Generate fSHAPE reactivity profiles for any region or transcript (expressed as BED regions) with python bedReactivities.py -h
+#Generate (f)SHAPE reactivity profiles for any region or transcript (expressed as BED regions) with python bedReactivities.py -h
 
 #DEPENDENCIES:
 Bedtools

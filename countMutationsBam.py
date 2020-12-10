@@ -8,7 +8,7 @@ def usage():
         -h, --help
 
         REQUIRED
-        -p, --probing   Specify structure probing dataset: SLBPdms | SLBPnai | SLBPfSHAPE
+        -p, --probing   Specify probing dataset: SLBPdms | SLBPnai | SLBPfSHAPE
         
         -d, --datapath        Datapath to .bam files generated from eCLIP pipeline. Default: "."
         ''')
@@ -280,7 +280,7 @@ def countMutationsBamMain(root,dataType):
         name = types[i]
         #subprocess.call('mkdir '+ root+types[i],shell=True)
              
-        infile = root+"/SLBP.CLIP_"+name+".umi.r1.fq.genome-mappedSoSo.rmDupSo.bam" #different naming with newest pipeline
+        infile = root+"/SLBP.CLIP_"+name+".umi.r1.fq.genome-mappedSoSo.rmDupSo.bam" #different naming with newest eCLIP pipeline
         outfile = root+"/SLBP.CLIP_"+name+".sam"
         subprocess.call('samtools view '+ infile+' > '+outfile,shell=True)
         

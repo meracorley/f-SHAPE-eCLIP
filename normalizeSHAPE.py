@@ -77,7 +77,9 @@ def unflatten(array1d,lengths): #this only works if the flattened arrays had the
     return array2d
 
 def HMM(bgDepth,rxDepth): #Determine positions of too-low coverage in bg and rx with a HMM
-    model = joblib.load("/home/mcorley/scripts/coverageHMM.pkl") #load the trained HMM model
+    SCRIPTPATH = __file__.rstrip("normalizeSHAPE.py")
+    model = joblib.load(SCRIPTPATH+"coverageHMM.pkl") #load the trained HMM model
+    model = joblib.load("coverageHMM.pkl") #load the trained HMM model
     rxLengths = [len(rxDepth)]*len(rxDepth[0])
     bgLengths = [len(bgDepth)]*len(bgDepth[0])
     #print(rxDepth[1:10])
@@ -229,6 +231,8 @@ def findBoxplotFactor(array,rxDepth,bgDepth,minDepth): #input could be 2D if mor
                 for i in range(-tenPct,0):
                     a = o[i] + a
                 normFactor[rep] = a/tenPct
+                if normFactor[rep] == 0:
+                    normFactor[rep] = 1.0
             except IndexError:
                 normFactor[rep] = 1.0
     #print "normFactor:", normFactor

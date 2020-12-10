@@ -15,7 +15,8 @@ from normalizeSHAPE import *
 import pybedtools as bedtools
 
 tnxDict = {}
-genefile = open("/home/mcorley/annotations/gene2transcript.txt",'r')
+SCRIPTPATH = __file__.rstrip("bedReactivities.py")
+genefile = open("./"+SCRIPTPATH+"gene2transcript.txt",'r')
 genes = genefile.read().splitlines()
 genefile.close()
 for line in genes:
@@ -33,13 +34,15 @@ def usage():
 
         REQUIRED
         -i, --input     The input text file of regions in BED format. Requires strand information.
+        
+        -g, --genome    The genome file (.fa) for the given data. Should match the genome build reads were aligned to.
 
         OPTIONAL
         -n, --name    Specify that regions should be output by BED name instead of BED region.
 
         -d, --datapath        Datapath to .bam files generated from eCLIP pipeline. Default: "."
 
-        -p, --probing   Use structure probing data. Specify dataset: SLBPdms | SLBPnai | SLBPfSHAPE
+        -p, --probing   Specify probing dataset: SLBPdms | SLBPnai | SLBPfSHAPE
         ''')
 
 def getAverage(reactivities): #return the average SHAPE reactivity of a region
@@ -133,10 +136,9 @@ def getCoverage(bedlines,prefixes): #given sorted matrix of bed regions
     covFiles = [] #coverage files are split up by chromosome, only need to parse the one corresponding to this bed file
     fileDNE = False
     for i in prefixes:
-        covFiles.append(i+chrom+strand+".cov") #chang icSHAPE
+        covFiles.append(i+chrom+strand+".cov")
         if not os.path.isfile(covFiles[-1]):
             fileDNE = True
-        #covFiles.append(i+".dedup.sort.REF_"+chrom+strand+".coverage") #rons icSHAPE
     if fileDNE: #for the case of a chromosome that has no coverage file. e.g. weird chromosomes
         return np.zeros((bedSum,4),dtype='int')+1,np.zeros((bedSum,4),dtype='int')
     
@@ -144,7 +146,7 @@ def getCoverage(bedlines,prefixes): #given sorted matrix of bed regions
 
     covFiles = [] #now get the 5' coverage
     for i in prefixes:
-        covFiles.append(i+chrom+strand+".mut") #chang icSHAPE
+        covFiles.append(i+chrom+strand+".mut")
     cov5 = cov_from_files(covFiles,bedPos,bedSum,chrom,0)
     if strand=="-":
         return cov[::-1], cov5[::-1]
@@ -324,9 +326,10 @@ def combineCoverage(cov,cov5,relPos_in,beds_in,strand,sequence,USE_BED_NAME = Fa
             reactivities = normalizeSHAPEmain(regionCov[1:],regionCov5[1:]+0.,regionSeq,trimEnds=True)
             write_to_file(reactivities,name,".rx",-999)
             enoughdata = write_map_file(reactivities,name,regionSeq,-999)
-            if enoughdata:
-                write_to_file(regionCov[1:],name,".cov",1) #last argurment tells write_to_file to not write if all values==1, for ex
-                write_to_file(regionCov5[1:],name,".5cov",0) 
+            ## uncomment to output coverages of	individual transcripts output in addition to map and rx	files
+            #if enoughdata:
+            #    write_to_file(regionCov[1:],name,".cov",1) #last argurment tells write_to_file to not write if all values==1, for ex
+            #    write_to_file(regionCov5[1:],name,".5cov",0) 
     else: #simply write the cov of each bed region to individual file
         #print(beds)
         c = 0
@@ -338,9 +341,10 @@ def combineCoverage(cov,cov5,relPos_in,beds_in,strand,sequence,USE_BED_NAME = Fa
             name = beds[c][0]+":"+beds[c][1]+"-"+beds[c][2]+beds[c][5] #chr:start-stop strand
             write_to_file(reactivities,name,".rx",-999)
             enoughdata = write_map_file(reactivities,name,regionSeq,-999)
-            if enoughdata:
-                write_to_file(cov[region[0]:region[1]],name,".cov",1)
-                write_to_file(cov5[region[0]:region[1]],name,".5cov",0)
+            ## uncomment to output coverages of individual transcripts output in addition to map and rx files 
+            #if enoughdata:
+            #    write_to_file(cov[region[0]:region[1]],name,".cov",1)
+            #    write_to_file(cov5[region[0]:region[1]],name,".5cov",0)
             c+=1
      
     
@@ -429,7 +433,7 @@ if __name__ == "__main__":
     INPUT = ""
     USE_BED_NAME = True
     dataType="SLBPfSHAPE"
-    GENOMEFILE = '/home/mcorley/annotations/hg19.fa'
+    GENOMEFILE = 'hg19.fa'
     DATAPATH = "."
     
     argv = sys.argv[1:] #grabs all the arguments

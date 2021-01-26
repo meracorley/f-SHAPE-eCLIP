@@ -154,7 +154,6 @@ def getCoverage(bedlines,prefixes): #given sorted matrix of bed regions
         print(covFiles[-1], "does not exist.")
         return np.zeros((bedSum,4),dtype='int')+1,np.zeros((bedSum,4),dtype='int')
     cov5 = cov_from_files(covFiles,bedPos,bedSum,chrom,0)
-    print(cov5)
     if strand=="-":
         return cov[::-1], cov5[::-1]
     else:

@@ -16,7 +16,7 @@ import pybedtools as bedtools
 
 tnxDict = {}
 SCRIPTPATH = __file__.rstrip("bedReactivities.py")
-genefile = open("./"+SCRIPTPATH+"gene2transcript.txt",'r')
+genefile = open(SCRIPTPATH+"gene2transcript.txt",'r')
 genes = genefile.read().splitlines()
 genefile.close()
 for line in genes:
@@ -140,6 +140,7 @@ def getCoverage(bedlines,prefixes): #given sorted matrix of bed regions
         if not os.path.isfile(covFiles[-1]):
             fileDNE = True
     if fileDNE: #for the case of a chromosome that has no coverage file. e.g. weird chromosomes
+        print(covFiles[-1], "does not exist.")
         return np.zeros((bedSum,4),dtype='int')+1,np.zeros((bedSum,4),dtype='int')
     
     cov = cov_from_files(covFiles,bedPos,bedSum,chrom,1) #starting at a base coverage of 1 because later have to divide by overall coverage
@@ -147,7 +148,13 @@ def getCoverage(bedlines,prefixes): #given sorted matrix of bed regions
     covFiles = [] #now get the 5' coverage
     for i in prefixes:
         covFiles.append(i+chrom+strand+".mut")
+        if not os.path.isfile(covFiles[-1]):
+            fileDNE = True
+    if fileDNE: #for the case of a chromosome that has no coverage file. e.g. weird chromosomes
+        print(covFiles[-1], "does not exist.")
+        return np.zeros((bedSum,4),dtype='int')+1,np.zeros((bedSum,4),dtype='int')
     cov5 = cov_from_files(covFiles,bedPos,bedSum,chrom,0)
+    print(cov5)
     if strand=="-":
         return cov[::-1], cov5[::-1]
     else:

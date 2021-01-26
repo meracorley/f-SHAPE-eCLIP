@@ -324,7 +324,7 @@ def combineCoverage(cov,cov5,relPos_in,beds_in,strand,sequence,USE_BED_NAME = Fa
             if name in tnxDict: #to get gene name in output file name
                 name += "."+tnxDict[name]
             reactivities = normalizeSHAPEmain(regionCov[1:],regionCov5[1:]+0.,regionSeq,trimEnds=True)
-            write_to_file(reactivities,name,".rx",-999)
+            #write_to_file(reactivities,name,".rx",-999)
             enoughdata = write_map_file(reactivities,name,regionSeq,-999)
             ## uncomment to output coverages of	individual transcripts output in addition to map and rx	files
             #if enoughdata:
@@ -339,7 +339,7 @@ def combineCoverage(cov,cov5,relPos_in,beds_in,strand,sequence,USE_BED_NAME = Fa
             #print(regionSeq)
             reactivities = normalizeSHAPEmain(cov[region[0]:region[1]],cov5[region[0]:region[1]]+0.,regionSeq,trimEnds=True)
             name = beds[c][0]+":"+beds[c][1]+"-"+beds[c][2]+beds[c][5] #chr:start-stop strand
-            write_to_file(reactivities,name,".rx",-999)
+            #write_to_file(reactivities,name,".rx",-999)
             enoughdata = write_map_file(reactivities,name,regionSeq,-999)
             ## uncomment to output coverages of individual transcripts output in addition to map and rx files 
             #if enoughdata:
@@ -431,7 +431,7 @@ def getSequence(mergedBed,strand):
 if __name__ == "__main__":
     #######Command line options
     INPUT = ""
-    USE_BED_NAME = True
+    USE_BED_NAME = False
     dataType="SLBPfSHAPE"
     GENOMEFILE = 'hg19.fa'
     DATAPATH = "."

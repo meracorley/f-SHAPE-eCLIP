@@ -1,26 +1,30 @@
-#Download eCLIP reads from https://www.ncbi.nlm.nih.gov/geo/query/acc.cgi?acc=GSE149767
+#Pipeline branch of f-SHAPE-eCLIP. 
 
-#Process and map reads with the eclip pipeline, available at https://github.com/yeolab/eclip
+# This repo contains definition files for steps to be appended to the main eCLIP workflow:
+1. Count mutation rates in these bam files with:
+```bash
+python counMutationsBam.py -h  # (Outputs (.coverage files) to /coverage folders within folder for each sample.)
+```
+2. Generate (f)SHAPE reactivity profiles for any region or transcript (expressed as BED regions) with:
+```bash
+python bedReactivities.py -h
+```
 
-#Requires hg19 STAR reference as in https://github.com/YeoLab/eclip/tree/master/example/inputs/hg19chr19kbp550_starindex
+### Installation/Steps to process your files (in progress):
 
-#Requires hg19 STAR repetive element annotations as in https://github.com/YeoLab/eclip/tree/master/example/inputs/hg113seqs_repbase_starindex
+1. Download eCLIP reads from https://www.ncbi.nlm.nih.gov/geo/query/acc.cgi?acc=GSE149767
 
-#specify where required files/annotations are and run eCLIP pipeline with:
+2. Install the required workflow and runner software as required by the core eCLIP pipeline: https://github.com/yeolab/eclip
 
-/bin/bash single_end_clip.yaml
+3. In addition to the cwl files for the eCLIP pipeline, export the cwl files in this module are also visible/accessible as executables.
 
-#eCLIP pipeline outputs bed files of binding sites and bam files of mapped IP reads.
+4. Run "wf_fshape_singleend"  # TODO
 
-#Count mutation rates in these bam files with:
+### eCLIP dependencies:
+- cwltool
+- docker
 
-python counMutationsBam.py -h
-
-#Outputs (.coverage files) to /coverage folders within folder for each sample.
-
-#Generate (f)SHAPE reactivity profiles for any region or transcript (expressed as BED regions) with python bedReactivities.py -h
-
-#DEPENDENCIES:
-Bedtools,
-Samtools,
-Python libraries: numpy, pybedtools
+### f-SHAPE pipeline-specific Dependencies (already included with eCLIP):
+- bedtools
+- samtools,
+- Python libraries: numpy, pybedtools

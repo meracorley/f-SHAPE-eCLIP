@@ -1,7 +1,13 @@
+#!/usr/bin/env python
+
+import os
 import re
 import subprocess
 import sys
 import getopt
+from argparse import ArgumentParser
+from argparse import RawDescriptionHelpFormatter
+
 def usage():
     print('''python countMutationsBam.py -p dataset [...]
         Options:
@@ -10,7 +16,7 @@ def usage():
         REQUIRED
         -p, --probing   Specify probing dataset: SLBPdms | SLBPnai | SLBPfSHAPE
         
-        -d, --datapath        Datapath to .bam files generated from eCLIP pipeline. Default: "."
+        -d, --output_path        output_path to .bam files generated from eCLIP pipeline. Default: "."
         ''')
     
 #Count mutations in maP read data. output .cov file
@@ -269,64 +275,78 @@ def splitReads(samfile,outputName):
     file.close()
     outfile.close()
     
-def countMutationsBamMain(root,dataType):
-    dataTypeDict = {"slbpuv":["dms1", "dms2","nodms1","nodms2"],
-                    "slbpnai":["NAI1","NAI2","noNAI1","noNAI2"],
-                    "slbpfshape":["vitro1","vitro2","vivo1","vivo2"]}
-    types = dataTypeDict[dataType]
+def countMutationsBamMain(bam_file, output_path):
     
-    for i in range(0,len(types)):
-        #convert bam to sam (no header)
-        name = types[i]
-        #subprocess.call('mkdir '+ root+types[i],shell=True)
-             
-        infile = root+"/SLBP.CLIP_"+name+".umi.r1.fq.genome-mappedSoSo.rmDupSo.bam" #different naming with newest eCLIP pipeline
-        outfile = root+"/SLBP.CLIP_"+name+".sam"
-        subprocess.call('samtools view '+ infile+' > '+outfile,shell=True)
-        
-        #split up spliced reads in sam and get .mdtag format
-        infile = root+types[i]+"/SLBP.CLIP_"+name+".sam"
-        outfile = root+types[i]+"/SLBP.CLIP_"+name+".mdtag"
-        splitReads(infile,outfile)
-        subprocess.call('sort -k 1,1 -k 3,3n ' + outfile + ' > ' + root+types[i]+"/SLBP.CLIP_"+name+ '.so.mdtag',shell=True)
-        #sort .mdtag files to .so.mdtag with sort -k 1,1 -k 3,3n
-        #new infile is .so.mdtag
-        infile = root+"/SLBP.CLIP_"+name+".so.mdtag"
-        outDir = root+"/"+name+"/coverage"
-        subprocess.call('mkdir '+name, shell=True)
-        subprocess.call('mkdir '+outDir, shell=True)
-        subprocess.call('rm '+outDir+'/*.mut', shell=True) #First remove all the .cov and .mut files in outDir (b/c they get appended to)
-        subprocess.call('rm '+outDir+'/*.cov', shell=True)
-        outputMutations(infile,outDir)
-        subprocess.call('rm '+outDir+'/none*', shell=True)
-    
-if __name__ == "__main__":
-    dataType = "slbpfshape"
-    root = "."
+    prefix = os.path.basename(os.path.splitext(bam_file)[0])
+    coverage_outputs = os.path.join(output_path, 'coverage')
+    sam_file = os.path.join(output_path, prefix + '.sam')
+    mdtag_file = os.path.join(output_path, prefix + '.mdtag')
+    mdtag_sorted_file = os.path.join(output_path, prefix + '.so.mdtag')
 
-    argv = sys.argv[1:] #grabs all the arguments
-    initialArgLen = len(argv)
-    #print(argv)
+    print("Outputs in {}".format(coverage_outputs))
+    subprocess.check_call('mkdir -p {}'.format(coverage_outputs), shell=True)  #   'mkdir '+name, shell=True)
+    
+    #convert bam to sam (no header)
+    print("Converting from {} to {}".format(bam_file, sam_file))
+    subprocess.check_call('samtools view {} > {}'.format(bam_file, sam_file), shell=True)  # 'samtools view '+ infile+' > '+sam_file, shell=True)
+
+    #split up spliced reads in sam and get .mdtag format
+    print("Splitting reads from {} to {}".format(sam_file, mdtag_file))
+    splitReads(sam_file, mdtag_file)
+    
+    print("Sorting {} to {}".format(mdtag_file, mdtag_sorted_file))
+    subprocess.check_call('sort -k 1,1 -k 3,3n ' + mdtag_file + ' > ' + mdtag_sorted_file, shell=True)
+    #sort .mdtag files to .so.mdtag with sort -k 1,1 -k 3,3n
+    #new infile is .so.mdtag
+    
+    # subprocess.call('rm '+outDir+'/*.mut', shell=True) #First remove all the .cov and .mut files in outDir (b/c they get appended to)
+    # subprocess.call('rm '+outDir+'/*.cov', shell=True)
+    outputMutations(mdtag_sorted_file, coverage_outputs)
+    # subprocess.call('rm '+outDir+'/none*', shell=True)
+
+def bam2sam(bam, sam):
+    """
+    Converts BAM file to SAM file.
+    """
     try:
-        opts, args = getopt.getopt(argv, "hp:d:", ["help", "probing=", "datapath="])
-    except getopt.GetoptError:
-        usage()
-        sys.exit(2)
+        subprocess.call('samtools view '+ bam+' > '+sam,shell=True)
+    except Exception as e:
+        return 1
+    return 0
 
-    for opt, arg in opts:
-        if opt in ("-h", "--help"):
-            usage()
-            sys.exit()
+def countMutationsBam(bamFile, outDir):
+    samFile = os.path.splitext(bamFile)[0] + '.sam'
+    sortedSamFile = os.path.splitext(bamFile)[0] + '.sorted.sam'
+    
+    bam2sam(bamFile, samFile)
+    outputMutations(samFile,outDir)
 
-        elif opt in ("-p", "--probing"):
-            dataType = arg
-            
-        elif opt in ("-d", "--datapath"):
-             root = arg
-            
-    dataType = dataType.lower()
-    if dataType not in dataTypeDict:
-        print("Unkown dataset", dataType)
-        usage()
-        sys.exit()
-    countMutationsBamMain(root,dataType)
+if __name__ == "__main__":
+    parser = ArgumentParser(
+        description='''python countMutationsBam.py -p dataset [...]
+        Options:
+        -h, --help
+
+        REQUIRED
+        -b, --bamfile         bam file (UMI-collapsed eCLIP BAM file (*.rmDupSo.bam))
+        
+        -d, --output_path        output_path for outputs.
+        '''
+    )
+    parser.add_argument(
+        "--bamfile",
+        "-b",
+        help="bamfile",
+        required=True
+    )
+    parser.add_argument(
+        "--data_path",
+        "-d",
+        help="data_path to .bam files generated from eCLIP pipeline.",
+        required=True
+    )
+    args = parser.parse_args()
+    bam_file = args.bamfile
+    output_path = args.data_path
+
+    countMutationsBamMain(bam_file, output_path)

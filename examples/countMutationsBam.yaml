@@ -1,0 +1,5 @@
+#!/usr/bin/env countMutationsBam.cwl
+
+clipBamFile:
+  class: File
+  path: /projects/ps-yeolab3/mcorley/projects/dmsClip/data/fosir/vitro1/SLBP.CLIP_vitro1.umi.r1.fq.genome-mappedSoSo.rmDupSo.bam

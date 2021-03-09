@@ -16,7 +16,7 @@ import pybedtools as bedtools
 
 tnxDict = {}
 SCRIPTPATH = __file__.rstrip("bedReactivities.py")
-genefile = open("./"+SCRIPTPATH+"gene2transcript.txt",'r')
+genefile = open(SCRIPTPATH+"gene2transcript.txt",'r')
 genes = genefile.read().splitlines()
 genefile.close()
 for line in genes:
@@ -42,7 +42,6 @@ def usage():
 
         -d, --datapath        Datapath to .bam files generated from eCLIP pipeline. Default: "."
 
-        -p, --probing   Specify probing dataset: SLBPdms | SLBPnai | SLBPfSHAPE
         ''')
 
 def getAverage(reactivities): #return the average SHAPE reactivity of a region
@@ -147,6 +146,10 @@ def getCoverage(bedlines,prefixes): #given sorted matrix of bed regions
     covFiles = [] #now get the 5' coverage
     for i in prefixes:
         covFiles.append(i+chrom+strand+".mut")
+        if not os.path.isfile(covFiles[-1]):
+            fileDNE = True
+    if fileDNE: #for the case of a chromosome that has no coverage file. e.g. weird chromosomes
+        return np.zeros((bedSum,4),dtype='int')+1,np.zeros((bedSum,4),dtype='int')
     cov5 = cov_from_files(covFiles,bedPos,bedSum,chrom,0)
     if strand=="-":
         return cov[::-1], cov5[::-1]
@@ -324,7 +327,7 @@ def combineCoverage(cov,cov5,relPos_in,beds_in,strand,sequence,USE_BED_NAME = Fa
             if name in tnxDict: #to get gene name in output file name
                 name += "."+tnxDict[name]
             reactivities = normalizeSHAPEmain(regionCov[1:],regionCov5[1:]+0.,regionSeq,trimEnds=True)
-            write_to_file(reactivities,name,".rx",-999)
+            #write_to_file(reactivities,name,".rx",-999)
             enoughdata = write_map_file(reactivities,name,regionSeq,-999)
             ## uncomment to output coverages of	individual transcripts output in addition to map and rx	files
             #if enoughdata:
@@ -339,7 +342,7 @@ def combineCoverage(cov,cov5,relPos_in,beds_in,strand,sequence,USE_BED_NAME = Fa
             #print(regionSeq)
             reactivities = normalizeSHAPEmain(cov[region[0]:region[1]],cov5[region[0]:region[1]]+0.,regionSeq,trimEnds=True)
             name = beds[c][0]+":"+beds[c][1]+"-"+beds[c][2]+beds[c][5] #chr:start-stop strand
-            write_to_file(reactivities,name,".rx",-999)
+            #write_to_file(reactivities,name,".rx",-999)
             enoughdata = write_map_file(reactivities,name,regionSeq,-999)
             ## uncomment to output coverages of individual transcripts output in addition to map and rx files 
             #if enoughdata:
@@ -348,25 +351,11 @@ def combineCoverage(cov,cov5,relPos_in,beds_in,strand,sequence,USE_BED_NAME = Fa
             c+=1
      
     
-def bedCoverageMain(bedfile,dataType="slbpuv",USE_BED_NAME=False):
-    dataTypeDict = {"slbpdms":["dms1", "dms2","nodms1","nodms2"],
-                    "slbpnai":["NAI1","NAI2","noNAI1","noNAI2"],
-                    "slbpfshape":["vitro2","vitro1","vivo1","vivo2"]}
-    filePrefixes = []
+def bedCoverageMain(bedfile,USE_BED_NAME=False):
+    pre = ["untreat1","untreat2","treat1","treat2"]
+    pre = ["vivo1","vivo2","vitro1","vitro2"]
+    filePrefixes = [DATAPATH+"/"+p+"/coverage/" for p in pre]    
 
-    dataType = dataType.lower()
-    if dataType in dataTypeDict:
-            treat1 = DATAPATH + "/"+ dataTypeDict[dataType][0]+"/coverage/"
-            treat2 = DATAPATH + "/"+ dataTypeDict[dataType][1]+"/coverage/"
-            neg1 = DATAPATH + "/"+ dataTypeDict[dataType][2]+"/coverage/"
-            neg2 = DATAPATH + "/"+ dataTypeDict[dataType][3]+"/coverage/"
-            filePrefixes = [neg1,neg2,treat1,treat2]
-    else:
-        print("Unkown dataset", dataType)
-        usage()
-        sys.exit()
-    #print(treat1, neg1)
-    
     #The input needs to be sorted. The best way to ensure that is to do it here.   
     sortedBed = binarySortBed(bed) #sorts by chromosome then start position in ascending order
     #The input can cover multiple chromosomes. Need to split up by chromosome AND strand for cov calculations. Binary sort bed does this. Just need to iterate through and define where chrom+strand starts and stops 
@@ -431,9 +420,8 @@ def getSequence(mergedBed,strand):
 if __name__ == "__main__":
     #######Command line options
     INPUT = ""
-    USE_BED_NAME = True
-    dataType="SLBPfSHAPE"
-    GENOMEFILE = 'hg19.fa'
+    USE_BED_NAME = False
+    GENOMEFILE = 'hg38.fa'
     DATAPATH = "."
     
     argv = sys.argv[1:] #grabs all the arguments
@@ -443,7 +431,7 @@ if __name__ == "__main__":
     initialArgLen = len(argv)
     #print(argv)
     try:
-        opts, args = getopt.getopt(argv, "hi:np:g:d:", ["help","input=", "name", "probing=","genome=","datapath="])
+        opts, args = getopt.getopt(argv, "hi:ng:d:", ["help","input=", "name","genome=","datapath="])
     except getopt.GetoptError:
         usage()
         sys.exit(2)
@@ -461,10 +449,6 @@ if __name__ == "__main__":
 
         elif opt in ("-n", "--name"):
             USE_BED_NAME = True
-
-
-        elif opt in ("-p", "--probing"):
-            dataType = arg
             
         elif opt in ("-g", "--genome"):
             GENOMEFILE = arg
@@ -505,6 +489,6 @@ if __name__ == "__main__":
     if len(bedlines)<1: #input was empty
         print("Input bed file is empty.")
         sys.exit()
-    bedCoverageMain(bed,dataType,USE_BED_NAME)
+    bedCoverageMain(bed,USE_BED_NAME)
 
     

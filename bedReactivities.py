@@ -38,10 +38,12 @@ def usage():
         
         -g, --genome    The genome file (.fa) for the given data. Should match the genome build reads were aligned to.
 
+        -a, --treated   Comma-separated list of paths to directories contaiting coverage files generated for treated (or in vitro) samples.
+
+        -b, --untreated Comma-separated list of paths to directories contaiting coverage files generated for untreated (or in vivo) samples.
+
         OPTIONAL
         -n, --name    Specify that regions should be output by BED name instead of BED region.
-
-        -d, --datapath        Datapath to .bam files generated from eCLIP pipeline. Default: "."
 
         -o, --output   The output files' basename. Outputs include .map files for each region with reactivity per base, and a .bigwig file describing reactivties across all regions.
         ''')
@@ -376,10 +378,10 @@ def combineCoverage(cov,cov5,relPos_in,beds_in,strand,sequence,USE_BED_NAME = Fa
      
     
 def bedCoverageMain(bedfile,USE_BED_NAME=False):
-    pre = ["untreat1","untreat2","treat1","treat2"]
-    pre = ["vivo1","vivo2","vitro1","vitro2"]
-    filePrefixes = [DATAPATH+"/"+p+"/coverage/" for p in pre]    
-
+    #pre = ["untreat1","untreat2","treat1","treat2"]
+    #pre = ["vivo1","vivo2","vitro1","vitro2"]
+    #filePrefixes = [DATAPATH+"/"+p+"/coverage/" for p in pre]    
+    filePrefixes  = [p+"/" for p in DATAPATH.split(',')]
     #The input needs to be sorted. The best way to ensure that is to do it here.   
     sortedBed = binarySortBed(bedfile) #sorts by chromosome then start position in ascending order
     #The input can cover multiple chromosomes. Need to split up by chromosome AND strand for cov calculations. Binary sort bed does this. Just need to iterate through and define where chrom+strand starts and stops 
@@ -446,7 +448,8 @@ if __name__ == "__main__":
     INPUT = ""
     USE_BED_NAME = False
     GENOMEFILE = 'hg38.fa'
-    DATAPATH = "."
+    DATAPATHa = ""
+    DATAPATHb = ""
     BASENAME = ""
     
     argv = sys.argv[1:] #grabs all the arguments
@@ -456,7 +459,7 @@ if __name__ == "__main__":
     initialArgLen = len(argv)
     #print(argv)
     try:
-        opts, args = getopt.getopt(argv, "hi:ng:d:o:", ["help","input=", "name","genome=","datapath=","output="])
+        opts, args = getopt.getopt(argv, "hi:ng:a:b:o:", ["help","input=", "name","genome=","treated=","untreated=","output="])
     except getopt.GetoptError:
         usage()
         sys.exit(2)
@@ -478,12 +481,20 @@ if __name__ == "__main__":
         elif opt in ("-g", "--genome"):
             GENOMEFILE = arg
           
-        elif opt in ("-d", "--datapath"):
-            DATAPATH = arg
+        elif opt in ("-a", "--treated"):
+            DATAPATHa = arg
+
+        elif opt in ("-b", "--untreated"):
+            DATAPATHb = arg
 
         elif opt in ("-o", "--output"):
             BASENAME = arg+"."
             
+    DATAPATH = DATAPATHb+","+DATAPATHa
+    if len(DATAPATHa.split(','))<1 or len(DATAPATHb.split(','))<1:
+        print("Provided paths to treated/untreated coverage data are either not comma-separated or too few samples.")
+        sys.exit()
+
     if len(args)>0 and len(args)<initialArgLen:
         print("WARNING: Unused options", args)
     elif len(args)>0: #options were supplied without switches - old version: bedCoverge.py file.bed sample_type

@@ -25,7 +25,8 @@ for line in genes:
     transcript = thisline[0]
     tnxDict[transcript] = gene
 
-global GENOME, DATAPATH
+global GENOME, DATAPATH, BASENAME
+BASENAME=""
 
 def usage():
     print('''python bedCoverage.py -i input_regions.bed [...]
@@ -42,6 +43,7 @@ def usage():
 
         -d, --datapath        Datapath to .bam files generated from eCLIP pipeline. Default: "."
 
+        -o, --output   The output files' basename. Outputs include .map files for each region with reactivity per base, and a .bigwig file describing reactivties across all regions.
         ''')
 
 def getAverage(reactivities): #return the average SHAPE reactivity of a region
@@ -139,7 +141,7 @@ def getCoverage(bedlines,prefixes): #given sorted matrix of bed regions
         if not os.path.isfile(covFiles[-1]):
             fileDNE = True
     if fileDNE: #for the case of a chromosome that has no coverage file. e.g. weird chromosomes
-        return np.zeros((bedSum,4),dtype='int')+1,np.zeros((bedSum,4),dtype='int')
+        return np.zeros((bedSum,len(prefixes)),dtype='int')+1,np.zeros((bedSum,len(prefixes)),dtype='int')
     
     cov = cov_from_files(covFiles,bedPos,bedSum,chrom,1) #starting at a base coverage of 1 because later have to divide by overall coverage
 
@@ -273,14 +275,14 @@ def average_replicates(rx): #rx = [rep1val,rep2val,etc]
         var = np.var(rx[rx!=-999])
     return average,var
 
-def write_map_file(rx,name,sequence,ignore=-999):
+def write_map_file(rx,name,sequence,ignore=-999,basename=BASENAME):
     #the "ignore" argument tells write_to_file to not write output if all values in cov==ignore
     extension = ".map"
     for i in range(0,len(rx[0])):
         values = rx[rx[:,i]!=ignore]
         if len(values)==0: #all the values were -999
             return False
-    outfile = open(name+extension, 'w') #writing given matrices to output files
+    outfile = open(basename+name+extension, 'w') #writing given matrices to output files
     counter = 1
     for line in rx:
         average,var = average_replicates(line)
@@ -288,6 +290,27 @@ def write_map_file(rx,name,sequence,ignore=-999):
         counter+=1
     outfile.close()
     return True
+
+def write_to_bedgraph(rx_in,chrom,start,strand,ignore=-999,basename=BASENAME):
+    extension = ".bedgraph"
+    rx = rx_in
+    if strand=="-":
+        rx = rx_in[::-1]
+    for i in range(0,len(rx[0])):
+        values = rx[rx[:,i]!=ignore]
+        if len(values)==0: #all the values were -999, dont write anything to file
+            return
+    #since bedgraph is strandless format, will output to separate + and - strand bedgrph files
+    outfile = open(basename+strand+"strand"+extension, 'a') #writing given matrices to output files
+    counter = int(start)-1
+    for line in rx:
+        counter+=1
+        average,var = average_replicates(line)
+        if average==ignore:
+            continue
+        outfile.write(chrom+"\t"+str(counter)+"\t"+str(counter+1)+"\t"+str(average)+"\n")
+    outfile.close()    
+
 
 def combineCoverage(cov,cov5,relPos_in,beds_in,strand,sequence,USE_BED_NAME = False): #input: coverage 5'coverage arrays and a 2darray of bed regions to extract. relPos format: [[relStart,relStop],...]
         #cov and cov5 profiles are returned reversed by getCoverage() if strand is negative
@@ -327,8 +350,8 @@ def combineCoverage(cov,cov5,relPos_in,beds_in,strand,sequence,USE_BED_NAME = Fa
             if name in tnxDict: #to get gene name in output file name
                 name += "."+tnxDict[name]
             reactivities = normalizeSHAPEmain(regionCov[1:],regionCov5[1:]+0.,regionSeq,trimEnds=True)
-            #write_to_file(reactivities,name,".rx",-999)
-            enoughdata = write_map_file(reactivities,name,regionSeq,-999)
+            #write_to_file(reactivities,name,".rx",-999,BASENAME)
+            enoughdata = write_map_file(reactivities,name,regionSeq,-999,BASENAME)
             ## uncomment to output coverages of	individual transcripts output in addition to map and rx	files
             #if enoughdata:
             #    write_to_file(regionCov[1:],name,".cov",1) #last argurment tells write_to_file to not write if all values==1, for ex
@@ -342,8 +365,9 @@ def combineCoverage(cov,cov5,relPos_in,beds_in,strand,sequence,USE_BED_NAME = Fa
             #print(regionSeq)
             reactivities = normalizeSHAPEmain(cov[region[0]:region[1]],cov5[region[0]:region[1]]+0.,regionSeq,trimEnds=True)
             name = beds[c][0]+":"+beds[c][1]+"-"+beds[c][2]+beds[c][5] #chr:start-stop strand
-            #write_to_file(reactivities,name,".rx",-999)
-            enoughdata = write_map_file(reactivities,name,regionSeq,-999)
+            #write_to_file(reactivities,name,".rx",-999,BASENAME)
+            write_to_bedgraph(reactivities,beds[c][0],beds[c][1],beds[c][5],-999,BASENAME)
+            enoughdata = write_map_file(reactivities,name,regionSeq,-999,BASENAME)
             ## uncomment to output coverages of individual transcripts output in addition to map and rx files 
             #if enoughdata:
             #    write_to_file(cov[region[0]:region[1]],name,".cov",1)
@@ -357,7 +381,7 @@ def bedCoverageMain(bedfile,USE_BED_NAME=False):
     filePrefixes = [DATAPATH+"/"+p+"/coverage/" for p in pre]    
 
     #The input needs to be sorted. The best way to ensure that is to do it here.   
-    sortedBed = binarySortBed(bed) #sorts by chromosome then start position in ascending order
+    sortedBed = binarySortBed(bedfile) #sorts by chromosome then start position in ascending order
     #The input can cover multiple chromosomes. Need to split up by chromosome AND strand for cov calculations. Binary sort bed does this. Just need to iterate through and define where chrom+strand starts and stops 
     lastKey = sortedBed[0][0]+sortedBed[0][5]
     start = 0
@@ -423,6 +447,7 @@ if __name__ == "__main__":
     USE_BED_NAME = False
     GENOMEFILE = 'hg38.fa'
     DATAPATH = "."
+    BASENAME = ""
     
     argv = sys.argv[1:] #grabs all the arguments
     if len(argv)==0:
@@ -431,7 +456,7 @@ if __name__ == "__main__":
     initialArgLen = len(argv)
     #print(argv)
     try:
-        opts, args = getopt.getopt(argv, "hi:ng:d:", ["help","input=", "name","genome=","datapath="])
+        opts, args = getopt.getopt(argv, "hi:ng:d:o:", ["help","input=", "name","genome=","datapath=","output="])
     except getopt.GetoptError:
         usage()
         sys.exit(2)
@@ -455,6 +480,9 @@ if __name__ == "__main__":
           
         elif opt in ("-d", "--datapath"):
             DATAPATH = arg
+
+        elif opt in ("-o", "--output"):
+            BASENAME = arg+"."
             
     if len(args)>0 and len(args)<initialArgLen:
         print("WARNING: Unused options", args)

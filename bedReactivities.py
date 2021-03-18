@@ -43,7 +43,7 @@ def usage():
         -b, --untreated Comma-separated list of paths to directories contaiting coverage files generated for untreated (or in vivo) samples.
 
         OPTIONAL
-        -n, --name    Specify that regions should be output by BED name instead of BED region.
+        -n, --name    Specify that regions should be output by BED name instead of BED region. Useful for outputting a reactivity profile across a spliced transcript.
 
         -o, --output   The output files' basename. Outputs include .map files for each region with reactivity per base, and a .bigwig file describing reactivties across all regions.
         ''')
@@ -367,6 +367,9 @@ def combineCoverage(cov,cov5,relPos_in,beds_in,strand,sequence,USE_BED_NAME = Fa
             #print(regionSeq)
             reactivities = normalizeSHAPEmain(cov[region[0]:region[1]],cov5[region[0]:region[1]]+0.,regionSeq,trimEnds=True)
             name = beds[c][0]+":"+beds[c][1]+"-"+beds[c][2]+beds[c][5] #chr:start-stop strand
+            name = beds[c][3]
+            if name in tnxDict:
+                name += "."+tnxDict[name]
             #write_to_file(reactivities,name,".rx",-999,BASENAME)
             write_to_bedgraph(reactivities,beds[c][0],beds[c][1],beds[c][5],-999,BASENAME)
             enoughdata = write_map_file(reactivities,name,regionSeq,-999,BASENAME)

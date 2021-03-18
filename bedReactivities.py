@@ -1,3 +1,5 @@
+#!/usr/bin/env python
+
 '''
 Script to find the 5'coverage and overall coverage of given bed regions using assigned .coverage files.
 Bed regions assumed to describe one transcript or regions. Bed regions should be sorted by position and non-overlapping.
@@ -13,6 +15,8 @@ import getopt
 import os
 from normalizeSHAPE import *
 import pybedtools as bedtools
+from argparse import ArgumentParser
+from argparse import RawDescriptionHelpFormatter
 
 tnxDict = {}
 SCRIPTPATH = __file__.rstrip("bedReactivities.py")
@@ -128,7 +132,7 @@ def getCoverage(bedlines,prefixes): #given sorted matrix of bed regions
     if len(bedlines[0])<6:
         print("Bed regions need strand information.")
         sys.exit()
-    strand = bedlines[0][5] #assuming all same strand too
+    strand = str(bedlines[0][5]) #assuming all same strand too
     #put bed regions into a stack (list)
     bedPos = []
     bedSum = 0
@@ -284,7 +288,13 @@ def write_map_file(rx,name,sequence,ignore=-999,basename=BASENAME):
         values = rx[rx[:,i]!=ignore]
         if len(values)==0: #all the values were -999
             return False
-    outfile = open(basename+name+extension, 'w') #writing given matrices to output files
+    
+    strand = name[-1]
+    if strand == '+':
+        name = name[:-1] + "-pos"
+    elif strand == '-':
+        name = name[:-1] + "-neg"
+    outfile = open("{}{}{}".format(basename, name.replace(':','-'), extension), 'w') #writing given matrices to output files
     counter = 1
     for line in rx:
         average,var = average_replicates(line)
@@ -303,7 +313,8 @@ def write_to_bedgraph(rx_in,chrom,start,strand,ignore=-999,basename=BASENAME):
         if len(values)==0: #all the values were -999, dont write anything to file
             return
     #since bedgraph is strandless format, will output to separate + and - strand bedgrph files
-    outfile = open(basename+strand+"strand"+extension, 'a') #writing given matrices to output files
+    formatted_strand = "pos" if strand == '+' else "neg"
+    outfile = open(basename+"{}.strand".format(formatted_strand)+extension, 'a') #writing given matrices to output files
     counter = int(start)-1
     for line in rx:
         counter+=1
@@ -451,56 +462,80 @@ if __name__ == "__main__":
     DATAPATHa = ""
     DATAPATHb = ""
     BASENAME = ""
+    parser = ArgumentParser(
+        description='''bedReactivities.py'''
+    )
+    parser.add_argument(
+        "--input",
+        "-i",
+        help="histfile",
+        required=True
+    )
+    parser.add_argument(
+        "--genome",
+        "-g",
+        help="genome FASTA file",
+        required=True
+    )
+    parser.add_argument(
+        "--treated",
+        "-a", 
+        dest='treated',
+        action='append', 
+        default=[], 
+        help="treated"
+    )
+    parser.add_argument(
+        "--untreated",
+        "-b", 
+        dest='untreated',
+        action='append', 
+        default=[], 
+        help="untreated"
+    )
+    parser.add_argument(
+        "--output",
+        "-o",
+        help="output prefix (eg. SLBP)",
+        required=True
+    )
+    parser.add_argument(
+        "--name",
+        "-n",
+        help="USE_BED_NAME flag",
+        required=False,
+        default=False,
+        action='store_true'
+    )
+    args = parser.parse_args()
+    INPUT = args.input
+    GENOMEFILE = args.genome
+    DATAPATHa = ','.join(args.treated)
+    DATAPATHb = ','.join(args.untreated)
+    BASENAME = args.output + '.'
+    USE_BED_NAME = args.name
+    print("ARGUMENTS: ")
+    print("INPUT: {}".format(INPUT))
+    print("GENOMEFILE: {}".format(GENOMEFILE))
+    print("DATAPATHa: {}".format(DATAPATHa))
+    print("DATAPATHb: {}".format(DATAPATHb))
+    print("BASENAME: {}".format(BASENAME))
+    print("USE_BED_NAME: {}".format(USE_BED_NAME))
     
-    argv = sys.argv[1:] #grabs all the arguments
-    if len(argv)==0:
-        usage()
-        sys.exit()
-    initialArgLen = len(argv)
-    #print(argv)
-    try:
-        opts, args = getopt.getopt(argv, "hi:ng:a:b:o:", ["help","input=", "name","genome=","treated=","untreated=","output="])
-    except getopt.GetoptError:
-        usage()
-        sys.exit(2)
-
-    for opt, arg in opts:
-        if opt in ("-h", "--help"):
-            usage()
-            sys.exit()
-
-        elif opt in ("-i", "--input"):
-            INPUT = arg
-            if not os.path.isfile(INPUT):
-                print("File "+ INPUT + " does not exist.")
-                sys.exit()
-
-        elif opt in ("-n", "--name"):
-            USE_BED_NAME = True
-            
-        elif opt in ("-g", "--genome"):
-            GENOMEFILE = arg
-          
-        elif opt in ("-a", "--treated"):
-            DATAPATHa = arg
-
-        elif opt in ("-b", "--untreated"):
-            DATAPATHb = arg
-
-        elif opt in ("-o", "--output"):
-            BASENAME = arg+"."
-            
     DATAPATH = DATAPATHb+","+DATAPATHa
     if len(DATAPATHa.split(','))<1 or len(DATAPATHb.split(','))<1:
         print("Provided paths to treated/untreated coverage data are either not comma-separated or too few samples.")
         sys.exit()
 
-    if len(args)>0 and len(args)<initialArgLen:
-        print("WARNING: Unused options", args)
-    elif len(args)>0: #options were supplied without switches - old version: bedCoverge.py file.bed sample_type
-        INPUT = args[0]
-        if len(args)>1:
-            dataType = args[1].lower()
+    # if len(args)>0 and len(args)<initialArgLen:
+    #     print("WARNING: Unused options", args)
+    # elif len(args)>0: #options were supplied without switches - old version: bedCoverge.py file.bed sample_type
+    #     INPUT = args[0]
+    #     if len(args)>1:
+    #         dataType = args[1].lower()
+            
+            
+            
     ################# END command line options code
     GENOME = bedtools.example_filename(GENOMEFILE)
     bedObject = bedtools.BedTool(INPUT)

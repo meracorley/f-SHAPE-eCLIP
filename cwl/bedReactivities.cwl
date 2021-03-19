@@ -53,13 +53,7 @@ inputs:
     inputBinding:
       position: 5
       prefix: -o
-  output_prefix:
-    default: true
-    type: string
-    inputBinding:
-      position: 6
-      prefix: -n
-      
+
 outputs:
 
   output_maps:

@@ -20,13 +20,13 @@ from argparse import RawDescriptionHelpFormatter
 
 tnxDict = {}
 SCRIPTPATH = __file__.rstrip("bedReactivities.py")
-genefile = open(SCRIPTPATH+"gene2transcript.txt",'r')
+genefile = open(SCRIPTPATH+"gene2name.txt",'r')
 genes = genefile.read().splitlines()
 genefile.close()
 for line in genes:
     thisline = line.split()
-    gene = thisline[1]
-    transcript = thisline[0]
+    gene = thisline[1]  # name
+    transcript = thisline[0]  # geneid
     tnxDict[transcript] = gene
 
 global GENOME, DATAPATH, BASENAME
@@ -315,6 +315,7 @@ def write_to_bedgraph(rx_in,chrom,start,strand,ignore=-999,basename=BASENAME):
     #since bedgraph is strandless format, will output to separate + and - strand bedgrph files
     formatted_strand = "pos" if strand == '+' else "neg"
     outfile = open(basename+"{}.strand".format(formatted_strand)+extension, 'a') #writing given matrices to output files
+    
     counter = int(start)-1
     for line in rx:
         counter+=1
@@ -365,6 +366,7 @@ def combineCoverage(cov,cov5,relPos_in,beds_in,strand,sequence,USE_BED_NAME = Fa
             reactivities = normalizeSHAPEmain(regionCov[1:],regionCov5[1:]+0.,regionSeq,trimEnds=True)
             #write_to_file(reactivities,name,".rx",-999,BASENAME)
             enoughdata = write_map_file(reactivities,name,regionSeq,-999,BASENAME)
+            write_to_bedgraph(rx_in=reactivities,chrom='chr1',start=1,strand='+',ignore=-999,basename=BASENAME)
             ## uncomment to output coverages of	individual transcripts output in addition to map and rx	files
             #if enoughdata:
             #    write_to_file(regionCov[1:],name,".cov",1) #last argurment tells write_to_file to not write if all values==1, for ex

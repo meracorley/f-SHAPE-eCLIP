@@ -18,7 +18,7 @@ set -o pipefail
 
 
 CWLRUNNER=cwltool # either: cwltool cwltoil or cwltorq
-WORKFLOW=wf_fshape_eclip # the prefix of the workflow cwl (without .cwl extension)
+WORKFLOW=wf_fshape # the prefix of the workflow cwl (without .cwl extension)
 
 PIPELINE=fSHAPE-ECLIP  # workflow prefix
 PIPELINEVERSION=0.0.1  # workflow version

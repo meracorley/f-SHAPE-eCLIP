@@ -18,7 +18,7 @@ requirements:
 # hints: 
 #   - class: DockerRequirement
 #     dockerPull: brianyee/fshape-eclip:0.0.1
-    
+
 baseCommand: [bedReactivities.py]
 
 inputs:
@@ -53,7 +53,13 @@ inputs:
     inputBinding:
       position: 5
       prefix: -o
-       
+  output_prefix:
+    default: true
+    type: string
+    inputBinding:
+      position: 6
+      prefix: -n
+      
 outputs:
 
   output_maps:

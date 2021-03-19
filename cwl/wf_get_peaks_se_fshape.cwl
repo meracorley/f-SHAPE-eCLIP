@@ -11,6 +11,7 @@ requirements:
   - class: InlineJavascriptRequirement
 
 inputs:
+
   dataset:
     type: string
 
@@ -39,6 +40,7 @@ inputs:
             type: File
           name:
             type: string
+            
   blacklist_file:
     type: File
     
@@ -208,37 +210,70 @@ outputs:
     outputSource: step_input_alignment/output_neg_bw
 
 
-  ### Peak outputs ###
+  ### Peak outputs (treated) ###
 
-
-  output_clipper_bed:
+  output_treated_clipper_bed:
     type: File
-    outputSource: step_clipper/output_bed
-  output_inputnormed_peaks:
-    type: File
-    outputSource: step_input_normalize_peaks/inputnormedBed
-  output_compressed_peaks:
-    type: File
-    outputSource: step_compress_peaks/output_bed
-
-  ### Downstream ###
-  
-  output_blacklist_removed_bed:
-    type: File
-    outputSource: step_blacklist_remove/output_blacklist_removed_bed
-  output_narrowpeak:
-    type: File
-    outputSource: step_bed_to_narrowpeak/output_narrowpeak
-  output_fixed_bed:
-    type: File
-    outputSource: step_fix_bed_for_bigbed_conversion/output_fixed_bed
-  output_bigbed:
-    type: File
-    outputSource: step_bed_to_bigbed/output_bigbed
-  output_entropynum:
-    type: File
-    outputSource: step_calculate_entropy/output_entropynum
+    outputSource: step_clipper_treated/output_bed
     
+  output_treated_inputnormed_peaks:
+    type: File
+    outputSource: step_inputnorm_treated/output_normed_bed
+  output_treated_compressed_peaks:
+    type: File
+    outputSource: step_inputnorm_treated/output_compressed_bed
+  
+  output_treated_blacklist_removed_bed:
+    type: File
+    outputSource: step_inputnorm_treated/output_blacklist_removed_bed
+  output_treated_narrowpeak:
+    type: File
+    outputSource: step_inputnorm_treated/output_narrowpeak
+  output_treated_fixed_bed:
+    type: File
+    outputSource: step_inputnorm_treated/output_fixed_bed
+  output_treated_bigbed:
+    type: File
+    outputSource: step_inputnorm_treated/output_bigbed
+  output_treated_entropynum:
+    type: File
+    outputSource: step_inputnorm_treated/output_entropynum
+  output_treated_sigpeaks:
+    type: File
+    outputSource: step_inputnorm_treated/output_sig_peaks
+
+  ### Peak outputs (untreated) ###
+
+  output_untreated_clipper_bed:
+    type: File
+    outputSource: step_clipper_untreated/output_bed
+    
+  output_untreated_inputnormed_peaks:
+    type: File
+    outputSource: step_inputnorm_untreated/output_normed_bed
+  output_untreated_compressed_peaks:
+    type: File
+    outputSource: step_inputnorm_untreated/output_compressed_bed
+  
+  output_untreated_blacklist_removed_bed:
+    type: File
+    outputSource: step_inputnorm_untreated/output_blacklist_removed_bed
+  output_untreated_narrowpeak:
+    type: File
+    outputSource: step_inputnorm_untreated/output_narrowpeak
+  output_untreated_fixed_bed:
+    type: File
+    outputSource: step_inputnorm_untreated/output_fixed_bed
+  output_untreated_bigbed:
+    type: File
+    outputSource: step_inputnorm_untreated/output_bigbed
+  output_untreated_entropynum:
+    type: File
+    outputSource: step_inputnorm_untreated/output_entropynum
+  output_untreated_sigpeaks:
+    type: File
+    outputSource: step_inputnorm_untreated/output_sig_peaks
+
   ### fSHAPE ###
   
   output_count_mutations_treated:
@@ -374,7 +409,17 @@ steps:
       output_neg_bw
     ]
 
-  step_clipper:
+  step_clipper_treated:
+    run: clipper.cwl
+    in:
+      species: species
+      bam: step_ip_treated_alignment/b1_output_rmdup_sorted_bam
+      outfile:
+        default: ""
+    out:
+      [output_bed]
+  
+  step_clipper_untreated:
     run: clipper.cwl
     in:
       species: species
@@ -383,96 +428,54 @@ steps:
         default: ""
     out:
       [output_bed]
-  
-
+      
 ###########################################################################
 # Downstream (Call peaks)
 ###########################################################################
 
-
-  step_ip_mapped_readnum:
-    run: samtools-mappedreadnum.cwl
+  step_inputnorm_treated:
+    run: wf_input_normalize.cwl
     in:
-      input: step_ip_untreated_alignment/b1_output_rmdup_sorted_bam
-      readswithoutbits:
-        default: 4
-      count:
-        default: true
-      output_name:
-        default: ip_mapped_readnum.txt
-    out: [output]
-
-  step_input_mapped_readnum:
-    run: samtools-mappedreadnum.cwl
-    in:
-      input: step_input_alignment/b1_output_rmdup_sorted_bam
-      readswithoutbits:
-        default: 4
-      count:
-        default: true
-      output_name:
-        default: input_mapped_readnum.txt
-    out: [output]
-
-  step_input_normalize_peaks:
-    run: overlap_peakfi_with_bam_PE.cwl
-    in:
-      clipBamFile: step_ip_untreated_alignment/b1_output_rmdup_sorted_bam
-      inputBamFile: step_input_alignment/b1_output_rmdup_sorted_bam
-      peakFile: step_clipper/output_bed
-      clipReadnum: step_ip_mapped_readnum/output
-      inputReadnum: step_input_mapped_readnum/output
+      ip_bam: step_ip_treated_alignment/b1_output_rmdup_sorted_bam
+      input_bam: step_input_alignment/b1_output_rmdup_sorted_bam
+      peaks: step_clipper_treated/output_bed
+      chrom_sizes: chrom_sizes
+      species: species
+      blacklist_file: blacklist_file
     out: [
-      inputnormedBed,
-      inputnormedBedfull
+      output_normed_bed,
+      output_normed_bed_full,
+      output_compressed_bed,
+      output_sorted_bed,
+      output_blacklist_removed_bed,
+      output_narrowpeak,
+      output_fixed_bed,
+      output_bigbed,
+      output_entropynum,
+      output_sig_peaks
     ]
 
-  step_compress_peaks:
-    run: peakscompress.cwl
+  step_inputnorm_untreated:
+    run: wf_input_normalize.cwl
     in:
-      input_bed: step_input_normalize_peaks/inputnormedBed
-    out: [output_bed]
-  
-  step_sort_bed:
-    run: sort-bed.cwl
-    in:
-      unsorted_bed: step_compress_peaks/output_bed
-    out: [sorted_bed]
-    
-  step_blacklist_remove:
-    run: blacklist-remove.cwl
-    in:
-      input_bed: step_sort_bed/sorted_bed
-      blacklist_file: blacklist_file
-    out: [output_blacklist_removed_bed]
-    
-  step_bed_to_narrowpeak:
-    run: bed_to_narrowpeak.cwl
-    in:
-      input_bed: step_blacklist_remove/output_blacklist_removed_bed
-      species: species
-    out: [output_narrowpeak]
-    
-  step_fix_bed_for_bigbed_conversion:
-    run: fix_bed_for_bigbed_conversion.cwl
-    in:
-      input_bed: step_blacklist_remove/output_blacklist_removed_bed
-    out: [output_fixed_bed]
-    
-  step_bed_to_bigbed:
-    run: bed_to_bigbed.cwl
-    in:
-      input_bed: step_fix_bed_for_bigbed_conversion/output_fixed_bed
+      ip_bam: step_ip_untreated_alignment/b1_output_rmdup_sorted_bam
+      input_bam: step_input_alignment/b1_output_rmdup_sorted_bam
+      peaks: step_clipper_untreated/output_bed
       chrom_sizes: chrom_sizes
-    out: [output_bigbed]
-
-  step_calculate_entropy:
-    run: calculate_entropy.cwl
-    in:
-      full: step_input_normalize_peaks/inputnormedBedfull
-      ip_mapped: step_ip_mapped_readnum/output
-      input_mapped: step_input_mapped_readnum/output
-    out: [output_entropynum]
+      species: species
+      blacklist_file: blacklist_file
+    out: [
+      output_normed_bed,
+      output_normed_bed_full,
+      output_compressed_bed,
+      output_sorted_bed,
+      output_blacklist_removed_bed,
+      output_narrowpeak,
+      output_fixed_bed,
+      output_bigbed,
+      output_entropynum,
+      output_sig_peaks
+    ]
     
 
 ###########################################################################

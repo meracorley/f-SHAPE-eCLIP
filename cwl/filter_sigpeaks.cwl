@@ -60,7 +60,7 @@ outputs:
       glob: |
         ${
           if (inputs.outfile == "") {
-            return inputs.bam.nameroot + ".sig.bed";
+            return inputs.peaks.nameroot + ".sig.bed";
           }
           else {
             return inputs.outfile;

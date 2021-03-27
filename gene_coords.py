@@ -64,8 +64,10 @@ def main():
                     genes.add(gene)
     DATABASE = gffutils.FeatureDB(db_file)
     coords = gene_id_to_coords(DATABASE)
-    
-    genes.remove('intergenic')  # removes intergenic
+    try:
+        genes.remove('intergenic')  # removes intergenic
+    except KeyError:  # no intergenic peaks exist. That's good!
+        pass
     with open(output_file, 'w') as o:
         for gene in genes:
             chrom, start, end, strand = coords[gene]

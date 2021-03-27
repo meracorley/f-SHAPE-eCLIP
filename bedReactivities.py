@@ -143,7 +143,8 @@ def getCoverage(bedlines,prefixes): #given sorted matrix of bed regions
     covFiles = [] #coverage files are split up by chromosome, only need to parse the one corresponding to this bed file
     fileDNE = False
     for i in prefixes:
-        covFiles.append(i+chrom+strand+".cov")
+        strand_str = ".pos" if strand == "+" else ".neg"
+        covFiles.append(i+chrom+strand_str+".cov")
         if not os.path.isfile(covFiles[-1]):
             fileDNE = True
     if fileDNE: #for the case of a chromosome that has no coverage file. e.g. weird chromosomes
@@ -153,7 +154,8 @@ def getCoverage(bedlines,prefixes): #given sorted matrix of bed regions
 
     covFiles = [] #now get the 5' coverage
     for i in prefixes:
-        covFiles.append(i+chrom+strand+".mut")
+        strand_str = ".pos" if strand == "+" else ".neg"
+        covFiles.append(i+chrom+strand_str+".mut")
         if not os.path.isfile(covFiles[-1]):
             fileDNE = True
     if fileDNE: #for the case of a chromosome that has no coverage file. e.g. weird chromosomes
@@ -261,6 +263,7 @@ def write_to_file(cov,name,extension,ignore=-999):
         values = cov[cov[:,i]!=ignore]
         if len(values)==0: #all the values were -999
             return
+    print(name+extension)
     outfile = open(name+extension, 'w') #writing given matrices to output files
     for line in cov:
         outline = ""

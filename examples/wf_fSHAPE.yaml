@@ -7,11 +7,11 @@ dataset: "SLBP"
 
 speciesGenomeDir:
   class: Directory
-  path: /projects/ps-yeolab4/software/eclip/0.7.0/examples/inputs/star_2_7_6a_gencode19_sjdb/
+  path: /projects/ps-yeolab3/bay001/annotations/hg19/star_2_4_0i_gencode19_sjdb/
 
 repeatElementGenomeDir:
   class: Directory
-  path: /projects/ps-yeolab4/software/eclip/0.7.0/examples/inputs/star_2_7_homo_sapiens_repbase_fixed_v2
+  path: /projects/ps-yeolab4/genomes/RepBase18.05.fasta/species_specific/homo_sapiens_repbase_v2/
 
 species: hg19
 

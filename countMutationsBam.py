@@ -117,10 +117,11 @@ def outputMutations(mdtagfile,outputDir): #no header in samfile
         thisread = [chrom,strand,pos,quals,MDtag]
         mutStop = mutStart[strand]+len(mutArray[strand]) 
         if pos >= mutStop or chrom!=mutChrom[strand]:
+            strand_str = ".pos" if strand == '+' else ".neg"
             #current read falls outside of current mut/cov tracking array.
             #write current mutArray/covArray to appropriate file and create new array.
-            outfile1 = open(outputDir+"/"+mutChrom[strand]+strand+".cov",'a')
-            outfile2 = open(outputDir+"/"+mutChrom[strand]+strand+".mut",'a')
+            outfile1 = open(outputDir+"/"+mutChrom[strand]+strand_str+".cov",'a')
+            outfile2 = open(outputDir+"/"+mutChrom[strand]+strand_str+".mut",'a')
             thisarray = mutArray[strand]
             for i in range(0,len(thisarray)):
                 if covArray[strand][i] > 0:

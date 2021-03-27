@@ -25,12 +25,14 @@ def main():
     parser.add_argument(
         "--l10p",
         required=False,
-        default=3.0
+        default=3.0,
+        type=float,
     )
     parser.add_argument(
         "--l2fc",
         required=False,
-        default=3.0
+        default=3.0,
+        type=float,
     )
     args = parser.parse_args()
     l10p = args.l10p
@@ -39,7 +41,13 @@ def main():
     output_file = args.output_peaks if args.output_peaks is not None else os.path.splitext(peaks_file)[0] + ".sig{}.{}.bed".format(l10p, l2fc)
     
     names = ['chrom','start','end','l10p','l2fc','strand']
-    peaks = pd.read_csv(peaks_file, names=names, sep='\t')
+    peaks = pd.read_csv(
+        peaks_file, 
+        names=names, 
+        sep='\t', 
+        dtype={'chrom': str, 'start': int, 'end': int, 'name': float, 'score': float, 'strand': str}
+    )
+    print(peaks.head())
     filtered_peaks = filter_peaks(peaks=peaks, nlog10p=l10p, l2fc=l2fc)
     filtered_peaks.to_csv(
         output_file, sep='\t', index=False, header=False

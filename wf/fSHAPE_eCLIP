@@ -17,7 +17,7 @@ set -o pipefail
 
 
 
-CWLRUNNER=cwltool # either: cwltool cwltoil or cwltorq
+CWLRUNNER=cwltorq # either: cwltool cwltoil or cwltorq
 WORKFLOW=wf_fshape # the prefix of the workflow cwl (without .cwl extension)
 
 PIPELINE=fSHAPE-ECLIP  # workflow prefix
@@ -157,6 +157,7 @@ then
     --no-container \
     --outdir ${OUTDIR} \
     --cachedir ${INTERM} \
+    --leave-tmpdir \
     ${WORKFLOW_HOME}/cwl/${WORKFLOW}.cwl \
     ${JOB_FILE} \
     2>${JOB_HOME}/${JOB_NAME}/${PIPELINE}_${JOB_NAME}_LOG.txt | tee ${JOB_HOME}/${JOB_NAME}/${PIPELINE}_${JOB_NAME}_OUTPUT.json
@@ -196,6 +197,7 @@ then
 #  ${WORKFLOW_HOME}/repo/cwl/${WORKFLOW}.cwl \
 
   cwltoil ${JOBSTOREEXITSLETSRESTART}  \
+    --no-container \
     --retryCount 3 \
     --batchSystem ${BATCHSYSTEM} \
     --stats \
@@ -252,7 +254,7 @@ echo "Moving tmp to outdir done."
 
 cd ${JOB_HOME}/${JOB_NAME}
 
-if grep -q "permanentFail" ${PIPELINE}_${JOB_NAME}_LOG.txt
+if grep -q "permanentFail" ${PIPELINE}_${JOB_NAME}_LOG.txt ;
 then
     echo "Not good (failures found, check log). Keeping intermediates for now." # code if found
 else

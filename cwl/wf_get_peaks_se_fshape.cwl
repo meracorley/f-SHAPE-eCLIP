@@ -279,15 +279,15 @@ outputs:
   output_count_mutations_treated:
     type: Directory
     outputSource: 
-      step_count_mutations_treated/outputDataPath
+      rename_treated/outdir
   output_count_mutations_untreated:
     type: Directory
     outputSource: 
-      step_count_mutations_untreated/outputDataPath
+      rename_untreated/outdir
   output_count_mutations_input:
     type: Directory
     outputSource: 
-      step_count_mutations_input/outputDataPath
+      rename_input/outdir
       
 steps:
 
@@ -488,17 +488,50 @@ steps:
       clipBamFile: step_ip_treated_alignment/b1_output_rmdup_sorted_bam
     out: 
       - outputDataPath
-      
+  
+  rename_treated:
+    run: rename_dir.cwl
+    in:
+      srcdir: step_count_mutations_treated/outputDataPath
+      newname:
+        source: step_ip_treated_alignment/b1_output_rmdup_sorted_bam
+        valueFrom: ${ return self.nameroot; }
+    out: [
+      outdir
+    ]
+    
   step_count_mutations_untreated:
     run: countMutationsBam.cwl
     in:
       clipBamFile: step_ip_untreated_alignment/b1_output_rmdup_sorted_bam
     out: 
       - outputDataPath
-
+  
+  rename_untreated:
+    run: rename_dir.cwl
+    in:
+      srcdir: step_count_mutations_untreated/outputDataPath
+      newname:
+        source: step_ip_untreated_alignment/b1_output_rmdup_sorted_bam
+        valueFrom: ${ return self.nameroot; }
+    out: [
+      outdir
+    ]
+    
   step_count_mutations_input:
     run: countMutationsBam.cwl
     in:
       clipBamFile: step_input_alignment/b1_output_rmdup_sorted_bam
     out: 
       - outputDataPath
+  
+  rename_input:
+    run: rename_dir.cwl
+    in:
+      srcdir: step_count_mutations_input/outputDataPath
+      newname:
+        source: step_input_alignment/b1_output_rmdup_sorted_bam
+        valueFrom: ${ return self.nameroot; }
+    out: [
+      outdir
+    ]

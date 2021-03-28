@@ -53,10 +53,10 @@ outputs:
       glob: |
         ${
           if (inputs.dataPath == "") {
-            return inputs.clipBamFile.nameroot;
+            return inputs.clipBamFile.nameroot + "/coverage";
           }
           else {
-            return inputs.dataPath;
+            return inputs.dataPath + "/coverage";
           }
         }
         

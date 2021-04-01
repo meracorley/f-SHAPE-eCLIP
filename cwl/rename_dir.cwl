@@ -9,6 +9,7 @@ requirements:
     listing:
       - entryname: $(inputs.newname)
         entry: $(inputs.srcdir)
+        writable: true
 
 baseCommand: "true"
 

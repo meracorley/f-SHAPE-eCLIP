@@ -333,7 +333,9 @@ outputs:
   output_bedgraphs:
     type: File[]
     outputSource: step_bedReactivities/output_bedgraphs
-
+  output_bigwigs:
+    type: File[]
+    outputSource: step_bedGraphToBigWig/bw
 
 steps:
 
@@ -455,3 +457,18 @@ steps:
       untreated_input: step_get_peaks/output_count_mutations_untreated
       output_prefix: dataset
     out: [output_maps, output_bedgraphs]
+  
+  step_bedgraph:
+    run: sort-bedGraph.cwl
+    scatter: unsorted_bedgraph
+    in:
+      unsorted_bedgraph: step_bedReactivities/output_bedgraphs
+    out: [sorted_bedgraph]
+      
+  step_bedGraphToBigWig:
+    run: bedGraphToBigWig.cwl
+    scatter: bedgraph
+    in:
+      bedgraph: step_bedgraph/sorted_bedgraph
+      chromsizes: chrom_sizes
+    out: [bw]

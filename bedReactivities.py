@@ -385,7 +385,7 @@ def combineCoverage(cov,cov5,relPos_in,beds_in,strand,sequence,USE_BED_NAME = Fa
             name = beds[c][0]+":"+beds[c][1]+"-"+beds[c][2]+beds[c][5] #chr:start-stop strand
             name = beds[c][3]
             if name in tnxDict:
-                name += "."+tnxDict[name]
+                name += "."+tnxDict[name].split('.')[0]
             #write_to_file(reactivities,name,".rx",-999,BASENAME)
             write_to_bedgraph(reactivities,beds[c][0],beds[c][1],beds[c][5],-999,BASENAME)
             enoughdata = write_map_file(reactivities,name,regionSeq,-999,BASENAME)

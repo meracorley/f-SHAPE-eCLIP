@@ -25,19 +25,19 @@ samples:
       name: CLIP_treat1
       read1:
         class: File
-        path: /projects/ps-yeolab4/seqdata/20200501_meredith_shape/geo_submission_01May2020_rawfiles/MC_vivo1_IP_S5_L002_R1_001.fastq.gz
+        path: /projects/ps-yeolab4/seqdata/20200501_meredith_shape/geo_submission_01May2020_rawfiles/MC_vitro1_IP_S7_L002_R1_001.fastq.gz
       adapters:
         class: File
-        path: /projects/ps-yeolab4/software/eclip/0.7.0/examples/inputs/InvRNA1_adapters.fasta
+        path: /projects/ps-yeolab4/software/eclip/0.7.0/examples/inputs/InvRNA2_adapters.fasta
 
     - ip_untreated_read:
       name: CLIP_untreat1
       read1:
         class: File
-        path: /projects/ps-yeolab4/seqdata/20200501_meredith_shape/geo_submission_01May2020_rawfiles/MC_vitro1_IP_S7_L002_R1_001.fastq.gz
+        path: /projects/ps-yeolab4/seqdata/20200501_meredith_shape/geo_submission_01May2020_rawfiles/MC_vivo1_IP_S5_L002_R1_001.fastq.gz
       adapters:
         class: File
-        path: /projects/ps-yeolab4/software/eclip/0.4.0/examples/inputs/InvRNA2_adapters.fasta
+        path: /projects/ps-yeolab4/software/eclip/0.4.0/examples/inputs/InvRNA1_adapters.fasta
 
     - input_read:
       name: INPUT_1
@@ -52,19 +52,19 @@ samples:
       name: CLIP_treat2
       read1:
         class: File
-        path: /projects/ps-yeolab4/seqdata/20200501_meredith_shape/geo_submission_01May2020_rawfiles/MC_vivo2_IP_S6_L002_R1_001.fastq.gz
+        path: /projects/ps-yeolab4/seqdata/20200501_meredith_shape/geo_submission_01May2020_rawfiles/MC_vitro2_IP_S8_L002_R1_001.fastq.gz
       adapters:
         class: File
-        path: /projects/ps-yeolab4/software/eclip/0.7.0/examples/inputs/InvRNA1_adapters.fasta
+        path: /projects/ps-yeolab4/software/eclip/0.7.0/examples/inputs/InvRNA2_adapters.fasta
 
     - ip_untreated_read:
       name: CLIP_untreat2
       read1:
         class: File
-        path: /projects/ps-yeolab4/seqdata/20200501_meredith_shape/geo_submission_01May2020_rawfiles/MC_vitro2_IP_S8_L002_R1_001.fastq.gz
+        path: /projects/ps-yeolab4/seqdata/20200501_meredith_shape/geo_submission_01May2020_rawfiles/MC_vivo2_IP_S6_L002_R1_001.fastq.gz
       adapters:
         class: File
-        path: /projects/ps-yeolab4/software/eclip/0.4.0/examples/inputs/InvRNA2_adapters.fasta
+        path: /projects/ps-yeolab4/software/eclip/0.4.0/examples/inputs/InvRNA1_adapters.fasta
 
     - input_read:
       name: INPUT_2

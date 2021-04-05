@@ -4,6 +4,10 @@ class: CommandLineTool
 
 cwlVersion: v1.0
 
+hints: 
+  - class: DockerRequirement
+    dockerPull: brianyee/fshape:347dd60
+    
 requirements:
   InitialWorkDirRequirement:
     listing:

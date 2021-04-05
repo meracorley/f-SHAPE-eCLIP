@@ -6,6 +6,10 @@ class: CommandLineTool
 requirements:
   - class: InlineJavascriptRequirement
 
+hints: 
+  - class: DockerRequirement
+    dockerPull: brianyee/fshape:347dd60
+    
 baseCommand: [gene_coords.py]
 
 inputs:

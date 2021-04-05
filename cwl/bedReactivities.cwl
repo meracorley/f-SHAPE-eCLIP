@@ -9,15 +9,10 @@ requirements:
   - class: ResourceRequirement
     coresMin: 1
     ramMin: 8000
-#   - class: InitialWorkDirRequirement
-#     listing:
-#       - entry: $(inputs.treated_input)
-#         writable: false
-#       - entry: $(inputs.untreated_input)
-#         writable: false
-# hints: 
-#   - class: DockerRequirement
-#     dockerPull: brianyee/fshape-eclip:0.0.1
+
+hints: 
+  - class: DockerRequirement
+    dockerPull: brianyee/fshape:347dd60
 
 baseCommand: [bedReactivities.py]
 

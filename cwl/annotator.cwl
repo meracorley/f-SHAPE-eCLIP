@@ -8,6 +8,10 @@ requirements:
 
 baseCommand: [annotator]
 
+hints:
+  - class: DockerRequirement
+    dockerPull: brianyee/annotator:v0.0.15
+    
 inputs:
 
   input:

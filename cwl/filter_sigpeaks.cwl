@@ -7,9 +7,9 @@ class: CommandLineTool
 requirements:
   - class: InlineJavascriptRequirement
 
-# hints: 
-#   - class: DockerRequirement
-#     dockerPull: brianyee/fshape-eclip:0.0.1
+hints: 
+  - class: DockerRequirement
+    dockerPull: brianyee/fshape:347dd60
     
 baseCommand: [filter_peaks.py]
 

@@ -333,6 +333,9 @@ outputs:
   output_bedgraphs:
     type: File[]
     outputSource: step_bedReactivities/output_bedgraphs
+  output_merged_bedgraphs:
+    type: File[]
+    outputSource: step_merge/merged_bedgraph
   output_bigwigs:
     type: File[]
     outputSource: step_bedGraphToBigWig/bw
@@ -464,11 +467,18 @@ steps:
     in:
       unsorted_bedgraph: step_bedReactivities/output_bedgraphs
     out: [sorted_bedgraph]
+  
+  step_merge:
+    run: bedtools-merge.cwl
+    scatter: input_bedgraph
+    in:
+      input_bedgraph: step_bedgraph/sorted_bedgraph
+    out: [merged_bedgraph]
       
   step_bedGraphToBigWig:
     run: bedGraphToBigWig.cwl
     scatter: bedgraph
     in:
-      bedgraph: step_bedgraph/sorted_bedgraph
+      bedgraph: step_merge/merged_bedgraph
       chromsizes: chrom_sizes
     out: [bw]

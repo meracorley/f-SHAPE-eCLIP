@@ -154,7 +154,6 @@ echo
 if [ $CWLRUNNER == cwltool ]
 then
   cwltool --debug \
-    --no-container \
     --outdir ${OUTDIR} \
     --cachedir ${INTERM} \
     --leave-tmpdir \

@@ -365,7 +365,7 @@ def combineCoverage(cov,cov5,relPos_in,beds_in,strand,sequence,USE_BED_NAME = Fa
                 #print(region[0], region[1])
             #print(regionSeq)
             if name in tnxDict: #to get gene name in output file name
-                name += "."+tnxDict[name]
+                name += "."+tnxDict[name].split('.')[0]
             reactivities = normalizeSHAPEmain(regionCov[1:],regionCov5[1:]+0.,regionSeq,trimEnds=True)
             #write_to_file(reactivities,name,".rx",-999,BASENAME)
             enoughdata = write_map_file(reactivities,name,regionSeq,-999,BASENAME)

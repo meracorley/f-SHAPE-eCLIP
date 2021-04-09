@@ -17,7 +17,7 @@ species: GRCh38_v29e
 
 chrom_sizes:
   class: File
-  path: /projects/ps-yeolab4/software/eclip/0.7.0/examples/inputs/hg19.chrom.sizes
+  path: /projects/ps-yeolab4/software/eclip/0.7.0/example/inputs/hg19.chrom.sizes
   
 samples:
   - 
@@ -28,7 +28,7 @@ samples:
         path: /home/centos/data/SRR11682382.fastq.gz
       adapters:
         class: File
-        path: /home/centos/eclip/examples/inputs/InvRNA2_adapters.fasta
+        path: /home/centos/eclip/example/inputs/InvRNA2_adapters.fasta
 
     - ip_untreated_read:
       name: CLIP_untreat1
@@ -37,7 +37,7 @@ samples:
         path: /home/centos/data/SRR11682378.fastq.gz
       adapters:
         class: File
-        path: /home/centos/eclip/examples/inputs/InvRNA1_adapters.fasta
+        path: /home/centos/eclip/example/inputs/InvRNA1_adapters.fasta
 
     - input_read:
       name: INPUT_1
@@ -46,7 +46,7 @@ samples:
         path: /home/centos/data/SRR11682384.fastq.gz
       adapters:
         class: File
-        path: /home/centos/eclip/examples/inputs/Ril19_adapters.fasta
+        path: /home/centos/eclip/example/inputs/a_adapters.fasta
   - 
     - ip_treated_read:
       name: CLIP_treat2
@@ -55,7 +55,7 @@ samples:
         path: /home/centos/data/SRR11682383.fastq.gz
       adapters:
         class: File
-        path: /home/centos/eclip/examples/inputs/InvRNA2_adapters.fasta
+        path: /home/centos/eclip/example/inputs/InvRNA2_adapters.fasta
 
     - ip_untreated_read:
       name: CLIP_untreat2
@@ -64,7 +64,7 @@ samples:
         path: /home/centos/data/SRR11682379.fastq.gz
       adapters:
         class: File
-        path: /home/centos/eclip/examples/inputs/InvRNA1_adapters.fasta
+        path: /home/centos/eclip/example/inputs/InvRNA1_adapters.fasta
 
     - input_read:
       name: INPUT_2
@@ -73,7 +73,7 @@ samples:
         path: /home/centos/data/SRR11682385.fastq.gz
       adapters:
         class: File
-        path: /home/centos/eclip/examples/inputs/Ril19_adapters.fasta
+        path: /home/centos/eclip/example/inputs/a_adapters.fasta
         
 blacklist_file:
   class: File

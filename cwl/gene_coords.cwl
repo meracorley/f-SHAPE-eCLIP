@@ -8,7 +8,7 @@ requirements:
 
 hints: 
   - class: DockerRequirement
-    dockerPull: brianyee/fshape:347dd60
+    dockerPull: brianyee/annotator:v0.0.15
     
 baseCommand: [gene_coords.py]
 
